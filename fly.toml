@@ -8,8 +8,6 @@ primary_region = "ams"
   PORT = "8080"
   DATABASE_PATH = "/data/changelog.sqlite"
   STATIC_DIR = "/app/public"
-  # SPA is served same-origin, so CORS is only relevant for external clients.
-  # Set API_TOKEN as a secret (`fly secrets set API_TOKEN=…`) to lock down writes.
 
 [[mounts]]
   source = "changelog_data"

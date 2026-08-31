@@ -13,7 +13,6 @@ function renderInline(text: string): ReactNode[] {
   });
 }
 
-// Intentionally small: handles the heading/list subset our generator emits.
 export function Markdown({ source }: { source: string }) {
   const blocks: ReactNode[] = [];
   const lines = source.split('\n');

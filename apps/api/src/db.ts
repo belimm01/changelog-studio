@@ -2,8 +2,6 @@ import { existsSync, mkdirSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname } from 'node:path';
 
-// Loaded via require so bundlers/test runners don't try to resolve the
-// node:sqlite builtin through their own module graph.
 const { DatabaseSync } = createRequire(import.meta.url)('node:sqlite') as typeof import('node:sqlite');
 
 export type DB = import('node:sqlite').DatabaseSync;
