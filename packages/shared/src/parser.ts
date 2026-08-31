@@ -98,8 +98,6 @@ export function parseCommits(rawCommits: RawCommit[]): ReleaseNotes {
   };
 }
 
-// Reads `git log --pretty=format:'%H%x1f%s%x1f%an%x1f%aI%x1f%b%x1e'`, and
-// falls back to one "<hash> <subject>" per line when the separators are absent.
 export function parseGitLog(raw: string): RawCommit[] {
   const text = raw.trim();
   if (!text) return [];

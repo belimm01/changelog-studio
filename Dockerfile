@@ -1,4 +1,3 @@
-# --- build stage ---
 FROM node:24-slim AS build
 WORKDIR /app
 
@@ -12,7 +11,6 @@ COPY . .
 RUN npm run build -w @changelog-studio/web
 RUN npm run build -w @changelog-studio/api
 
-# --- runtime stage ---
 FROM node:24-slim AS runtime
 WORKDIR /app
 ENV NODE_ENV=production

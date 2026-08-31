@@ -8,9 +8,6 @@ function safeEqual(a: string, b: string): boolean {
   return timingSafeEqual(bufA, bufB);
 }
 
-// Returns a guard for write endpoints. When no token is configured the guard is
-// a no-op, keeping local development and the public demo open; when API_TOKEN is
-// set, mutations require a matching `Authorization: Bearer <token>` header.
 export function bearerAuth(token: string | undefined): RequestHandler {
   if (!token) return (_req, _res, next) => next();
 

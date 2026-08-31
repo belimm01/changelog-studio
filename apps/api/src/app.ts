@@ -45,8 +45,6 @@ export function createApp({
 
   app.use(helmet());
   app.use(express.json({ limit: '1mb' }));
-  // In production the SPA is served same-origin by this API, so CORS only
-  // applies to explicit cross-origin API clients; lock it down with CORS_ORIGIN.
   app.use(cors({ origin: corsOrigin && corsOrigin.length ? corsOrigin : true }));
 
   app.get('/api/health', (_req, res) => {
