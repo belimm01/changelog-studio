@@ -1,0 +1,29 @@
+app = "changelog-studio"
+primary_region = "ams"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "8080"
+  DATABASE_PATH = "/data/changelog.sqlite"
+  STATIC_DIR = "/app/public"
+  # SPA is served same-origin, so CORS is only relevant for external clients.
+  # Set API_TOKEN as a secret (`fly secrets set API_TOKEN=…`) to lock down writes.
+
+[[mounts]]
+  source = "changelog_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [[http_service.checks]]
+    method = "GET"
+    path = "/api/health"
+    interval = "30s"
+    timeout = "5s"
