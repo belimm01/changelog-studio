@@ -25,8 +25,13 @@ leaving you in control of the final copy.
   `BREAKING CHANGE:` footers, with unknown types collapsed into *Other*.
 - **Semver suggestion** — derives `major` / `minor` / `patch` from the batch.
 - **Markdown generation** — GitHub-flavored output, breaking changes first.
-- **Editor + live preview** — paste, generate, tweak, publish.
-- **Public changelog feed** — persisted to SQLite, served over a REST API.
+- **Instant preview** — the shared parser runs in the browser, so the rendered
+  release notes update as you type, offline, with no API round-trip.
+- **Release feed** — browse, search, and filter published changelogs, each with
+  its own permalink; copy or download any release as Markdown.
+- **Edit + publish** — create or update entries through the API, with an
+  optional Bearer token kept in local storage for locked-down deployments.
+- **Themeable** — dark and light themes with system-preference detection.
 
 ## Architecture
 
@@ -60,7 +65,7 @@ web app is a thin view over the API.
 | Language | TypeScript (strict), ESM                            |
 | Core     | Zod for schema/validation, plain functions          |
 | API      | Express, `node:sqlite`, Vitest + supertest          |
-| Web      | React 18, Vite                                       |
+| Web      | React 18, React Router, Vite                         |
 | Tooling  | npm workspaces, ESLint, tsup, GitHub Actions, Docker |
 
 ## Quickstart
