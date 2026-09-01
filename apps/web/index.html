@@ -1,9 +1,25 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark light" />
+    <meta
+      name="description"
+      content="Turn raw git commits into polished, categorized release notes."
+    />
     <title>Changelog Studio</title>
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('changelog-studio:theme');
+          var prefersLight =
+            window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+          var theme = stored === 'light' || stored === 'dark' ? stored : prefersLight ? 'light' : 'dark';
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
