@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import request from 'supertest';
+import type { Changelog } from '@changelog-studio/shared';
 import { createApp } from './app.js';
 import { createDb, type DB } from './db.js';
 
@@ -173,5 +174,92 @@ describe('write authentication', () => {
       .send({ commits: [{ hash: 'abcdef1', subject: 'fix(api): auth boundary' }] });
     expect(parsed.status).toBe(200);
     expect(parsed.body.markdown).toContain('Bug Fixes');
+  });
+});
+
+describe('changelog listing and filtering', () => {
+  const bearer = 'Bearer secret-token';
+  let db: DB;
+  let app: ReturnType<typeof createApp>;
+  let clock: number;
+
+  beforeEach(() => {
+    db = createDb(':memory:');
+    clock = 0;
+    app = createApp({
+      db,
+      apiToken: 'secret-token',
+      now: () => new Date(Date.UTC(2026, 0, 1, 0, 0, clock++)).toISOString(),
+    });
+  });
+
+  afterEach(() => db.close());
+
+  async function seed(entry: { project: string; version: string; published?: boolean }) {
+    const res = await request(app)
+      .post('/api/changelogs')
+      .set('Authorization', bearer)
+      .send({
+        project: entry.project,
+        version: entry.version,
+        title: `${entry.project} ${entry.version}`,
+        markdown: `## ${entry.version}\n\n- ${entry.project}`,
+        published: entry.published ?? false,
+      });
+    expect(res.status).toBe(201);
+    return res.body;
+  }
+
+  function labels(body: Changelog[]): string[] {
+    return body.map((c) => `${c.project}:${c.version}`);
+  }
+
+  it('filters to a single project and orders newest first', async () => {
+    await seed({ project: 'alpha', version: 'v1' });
+    await seed({ project: 'beta', version: 'v1' });
+    await seed({ project: 'alpha', version: 'v2' });
+
+    const res = await request(app).get('/api/changelogs?project=alpha');
+    expect(res.status).toBe(200);
+    expect(labels(res.body)).toEqual(['alpha:v2', 'alpha:v1']);
+    expect(res.body.every((c: Changelog) => c.project === 'alpha')).toBe(true);
+  });
+
+  it('returns published and unpublished entries by default, newest first', async () => {
+    await seed({ project: 'alpha', version: 'v1', published: true });
+    await seed({ project: 'alpha', version: 'v2', published: false });
+
+    const res = await request(app).get('/api/changelogs');
+    expect(res.status).toBe(200);
+    expect(labels(res.body)).toEqual(['alpha:v2', 'alpha:v1']);
+    expect(res.body.map((c: Changelog) => c.published)).toEqual([false, true]);
+  });
+
+  it('restricts to published entries across every project', async () => {
+    await seed({ project: 'alpha', version: 'v1', published: true });
+    await seed({ project: 'beta', version: 'v1', published: false });
+    await seed({ project: 'beta', version: 'v2', published: true });
+
+    const res = await request(app).get('/api/changelogs?published=true');
+    expect(res.status).toBe(200);
+    expect(labels(res.body)).toEqual(['beta:v2', 'alpha:v1']);
+  });
+
+  it('combines the project and published filters', async () => {
+    await seed({ project: 'alpha', version: 'v1', published: true });
+    await seed({ project: 'alpha', version: 'v2', published: false });
+    await seed({ project: 'beta', version: 'v1', published: true });
+
+    const res = await request(app).get('/api/changelogs?project=alpha&published=true');
+    expect(res.status).toBe(200);
+    expect(labels(res.body)).toEqual(['alpha:v1']);
+  });
+
+  it('returns an empty array for a project with no changelogs', async () => {
+    await seed({ project: 'alpha', version: 'v1' });
+
+    const res = await request(app).get('/api/changelogs?project=ghost');
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual([]);
   });
 });
