@@ -95,7 +95,7 @@ npm run build      # production build of api + web
 | Method   | Path                   | Description                              |
 | -------- | ---------------------- | ---------------------------------------- |
 | `GET`    | `/api/health`          | Liveness probe.                          |
-| `POST`   | `/api/parse`           | Parse `{ gitLog }` or `{ commits }`.     |
+| `POST`   | `/api/parse`           | Parse `{ gitLog }` or `{ commits }`; optional `version`/`date` for the heading. |
 | `GET`    | `/api/changelogs`      | List (`?project=`, `?published=true`).   |
 | `POST`   | `/api/changelogs`      | Create a changelog.                      |
 | `GET`    | `/api/changelogs/:id`  | Fetch one.                               |
@@ -105,8 +105,12 @@ npm run build      # production build of api + web
 ```bash
 curl -s localhost:4000/api/parse \
   -H 'content-type: application/json' \
-  -d '{"gitLog":"a1b2c3d feat(api): add pagination\nd4e5f6a fix: null guard"}' | jq
+  -d '{"gitLog":"a1b2c3d feat(api): add pagination\nd4e5f6a fix: null guard","version":"v1.2.0","date":"2026-08-31"}' | jq
 ```
+
+Supplying `version` (and optionally `date`) renders a release heading such as
+`## v1.2.0 (2026-08-31)` instead of the default `## Unreleased`, so the returned
+`markdown` is publish-ready. Both are omitted by default.
 
 ## Producing input from git
 

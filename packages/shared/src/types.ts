@@ -78,6 +78,8 @@ export const parseRequestSchema = z
   .object({
     gitLog: z.string().optional(),
     commits: z.array(rawCommitSchema).optional(),
+    version: z.string().min(1).max(40).optional(),
+    date: z.string().min(1).max(40).optional(),
   })
   .refine((v) => !!v.gitLog || (v.commits && v.commits.length > 0), {
     message: 'Provide either a `gitLog` string or a non-empty `commits` array.',

@@ -52,10 +52,10 @@ export function createApp({
   });
 
   app.post('/api/parse', (req, res) => {
-    const { gitLog, commits } = parseRequestSchema.parse(req.body);
+    const { gitLog, commits, version, date } = parseRequestSchema.parse(req.body);
     const raw = commits ?? parseGitLog(gitLog ?? '');
     const notes = parseCommits(raw);
-    res.json({ notes, markdown: renderMarkdown(notes) });
+    res.json({ notes, markdown: renderMarkdown(notes, { version, date }) });
   });
 
   app.get('/api/changelogs', (req, res) => {
