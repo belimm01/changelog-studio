@@ -30,6 +30,48 @@ describe('changelog-studio api', () => {
     expect(res.body.markdown).toContain('### Features');
   });
 
+  it('defaults the markdown heading to Unreleased without a version', async () => {
+    const res = await request(app)
+      .post('/api/parse')
+      .send({ commits: [{ hash: 'abcdef1', subject: 'feat(ui): dark mode' }] });
+    expect(res.status).toBe(200);
+    expect(res.body.markdown.split('\n')[0]).toBe('## Unreleased');
+  });
+
+  it('renders a supplied version and date into the markdown heading', async () => {
+    const res = await request(app)
+      .post('/api/parse')
+      .send({
+        commits: [{ hash: 'abcdef1', subject: 'feat(ui): dark mode' }],
+        version: 'v1.2.0',
+        date: '2026-08-31',
+      });
+    expect(res.status).toBe(200);
+    expect(res.body.markdown.split('\n')[0]).toBe('## v1.2.0 (2026-08-31)');
+  });
+
+  it('renders a version without a date when only a version is supplied', async () => {
+    const res = await request(app)
+      .post('/api/parse')
+      .send({
+        commits: [{ hash: 'abcdef1', subject: 'feat(ui): dark mode' }],
+        version: 'v1.2.0',
+      });
+    expect(res.status).toBe(200);
+    expect(res.body.markdown.split('\n')[0]).toBe('## v1.2.0');
+  });
+
+  it('rejects a version that exceeds the length bound', async () => {
+    const res = await request(app)
+      .post('/api/parse')
+      .send({
+        commits: [{ hash: 'abcdef1', subject: 'feat(ui): dark mode' }],
+        version: 'v'.repeat(41),
+      });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('Validation failed');
+  });
+
   it('rejects an empty parse request', async () => {
     const res = await request(app).post('/api/parse').send({});
     expect(res.status).toBe(400);
